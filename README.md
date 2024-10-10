@@ -1,6 +1,6 @@
-# RPNet (Han et al., under review)
+# RPNet (Han et al., in review)
 
-This is the repository for the RPNet package, a deep learning model for automatic P-wave first motion determination (Han et al., under review).
+This is the repository for the RPNet package, a deep learning model for automatic P-wave first motion determination (Han et al., in review).
 
 A detailed README.md and user manual file will be updated soon. 
 
