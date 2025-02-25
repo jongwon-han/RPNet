@@ -2,7 +2,7 @@
 
 This is the repository for the RPNet package, a deep learning model for automatic P-wave first motion determination (Han et al., 2025; SRL).
 
-The code is currently being packaged with detailed user manual, and the official release is planned before the end of February. 
+The code is currently being packaged with detailed user manual, and the official release is planned before the end of March. 
 Please take this into consideration when using it.
 
 The `run_RPNet.py` script predicts P-wave polarity from SAC or MSEED files using the RPNet model and automatically generates input files for SKHASH (Skoumal et al., 2024), a Python software based on HASH (Hardebeck and Shearer, 2002, 2003).
