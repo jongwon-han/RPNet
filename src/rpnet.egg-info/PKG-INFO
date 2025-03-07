@@ -1,0 +1,34 @@
+Metadata-Version: 2.2
+Name: rpnet
+Version: 0.0.1
+Summary: Robust P-wave first motion determination using deep learning (Han et al., 2025; SRL)
+Home-page: https://github.com/jongwon-han/RPNet
+Author: Jongwon_Han
+Author-email: jwhan@kigam.re.kr
+Project-URL: Bug Tracker, https://github.com/jongwon-han/RPNet/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.9
+License-File: LICENSE.txt
+Requires-Dist: pandas==1.4.4
+Requires-Dist: h5py==3.1.0
+Requires-Dist: numpy==1.19.5
+Requires-Dist: parmap==1.7.0
+Requires-Dist: tensorflow==2.7.0
+Requires-Dist: tensorflow-gpu==2.7.0
+Requires-Dist: keras-self-attention==0.50.0
+Requires-Dist: matplotlib==3.6.3
+Requires-Dist: tqdm==4.66.2
+Requires-Dist: obspy==1.3.1
+Requires-Dist: scikit-learn==1.6.1
+Requires-Dist: plotly==5.19.0
+Requires-Dist: protobuf==3.20.0
+Requires-Dist: notebook==7.3.2
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
