@@ -8,7 +8,7 @@ v.0.0.2
 - [updated] st=st.select(channel='*Z')
 
 [Updates]
-
+- Uploaded pre-trained model files to github repository.
 =======================================
 v.0.0.1
 - First version of RPNet
