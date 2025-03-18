@@ -4,9 +4,6 @@ This is the repository for the RPNet package, a deep learning model for automati
 
 The RPNet predicts P-wave polarity from SAC or MSEED files using the pre-trained model and automatically generates input files for SKHASH (Skoumal et al., 2024), a Python software based on HASH (Hardebeck and Shearer, 2002, 2003).
 
-The pretrained model files can be downloaded from the following link:
-[Pretrained Model Download](https://drive.google.com/drive/folders/1VlhPiLEx6XKBkmLdkc9RJ6fFTcSD0-0B?usp=sharing)
-
 [SKHASH (Skoumal et al., 2024)](https://code.usgs.gov/esc/SKHASH)
 
 
@@ -36,10 +33,6 @@ git clone https://github.com/jongwon-han/RPNet
 Next, open the Jupyter notebook **run_RPNet.ipynb** in the example directory to refer to the example files and tutorial.
 
 RPNet supports multiprocessing-based preprocessing using the **parmap** module.<br>
-
-Before using RPNet, download the pre-trained model from the link below and place it in the "../model" directory.<br>
-
-[click here for pre-trained models](https://drive.google.com/drive/folders/1VlhPiLEx6XKBkmLdkc9RJ6fFTcSD0-0B?usp=sharing)
 
 ---
 ### Dependencies
