@@ -1,5 +1,5 @@
 """
-# RPNet (v.0.0.1)
+# RPNet (v.0.0.2)
 https://github.com/jongwon-han/RPNet
 
 RPNet: Robust P-wave first-motion polarity determination using deep learning (Han et al., 2025; SRL)
@@ -9,7 +9,7 @@ Example script to run the sample Hi-net dataset (hyperparameters)
 
 - Jongwon Han (@KIGAM)
 - jwhan@kigam.re.kr
-- Last update: 2025. 2. 24.
+- Last update: 2025. 3. 18.
 """
 
 

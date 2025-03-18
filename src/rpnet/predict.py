@@ -1,5 +1,5 @@
 """
-# RPNet (v.0.0.1)
+# RPNet (v.0.0.2)
 https://github.com/jongwon-han/RPNet
 
 RPNet: Robust P-wave first-motion polarity determination using deep learning (Han et al., 2025; SRL)
@@ -9,7 +9,7 @@ Main function modules
 
 - Jongwon Han (@KIGAM)
 - jwhan@kigam.re.kr
-- Last update: 2025. 2. 24.
+- Last update: 2025. 3. 18.
 """
 
 ###############################################
@@ -52,7 +52,7 @@ def wf2matrix(vals):
     try:
         idx,val,fwfid,fptime,wf_dir,out_dir=vals
         st=read(wf_dir+'/'+val[fwfid]+'/'+val.sta+'.*')
-        st.select(channel='*Z')
+        st=st.select(channel='*Z')
         if not st[0].stats.sampling_rate==100:
             st.interpolate(100)
         if not len(st)==0:
