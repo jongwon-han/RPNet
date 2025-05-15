@@ -1,0 +1,67 @@
+## Control file for SKHASH driver3 (from RPNet result)
+
+$input_format  # format of input files
+hash3
+
+$stfile        # station list filepath
+./output01/hash3/IN/station.txt
+
+$fpfile        # P-polarity input filepath
+./output01/hash3/IN/phase.txt
+
+$ampfile       # amplitude input filepath
+./output01/hash3/IN/amp.txt
+
+$outfile1      # focal mechanisms output filepath
+./output01/hash3/OUT/out.csv
+
+$outfile2      # acceptable plane output filepath
+./output01/hash3/OUT/out2.csv
+
+$outfolder_plots        # figure directory
+./output01/hash3/OUT/figure
+
+$vmodel_paths  # whitespace/newline delimited list of paths to the velocity models
+/home/jwhan/vz.iasp91
+
+$npolmin       # mininum number of polarity data (e.g., 8)
+8
+
+$max_agap      # maximum azimuthal gap
+360
+
+$max_pgap      # maximum "plungal" gap
+90
+
+$dang          # minimum grid spacing (degrees)
+1
+
+$nmc           # number of trials (e.g., 30)
+30
+
+$maxout        # max num of acceptable focal mech. outputs (e.g., 500)
+500
+
+$ratmin        # minimum allowed signal to noise ratio
+1
+
+$badfrac       # fraction polarities assumed bad
+0.05
+
+$qbadfrac      # assumed noise in amplitude ratios, log10 (e.g. 0.3 for a factor of 2)
+0.3
+
+$delmax        # maximum allowed source-receiver distance in km.
+100
+
+$cangle        # angle for computing mechanisms probability
+45
+
+$prob_max      # probability threshold for multiples (e.g., 0.1)
+0.25
+
+$num_cpus      # number of cores in parallel (0: use all cpu / 1: sigle core)
+10
+
+$use_fortran   # Fortran subroutine for fast grid search
+True

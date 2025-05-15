@@ -1,15 +1,15 @@
 """
-# RPNet (v.0.0.2)
+# RPNet (v.0.1.0)
 https://github.com/jongwon-han/RPNet
 
 RPNet: Robust P-wave first-motion polarity determination using deep learning (Han et al., 2025; SRL)
 doi: https://doi.org/10.1785/0220240384
 
-Main function modules
+Main function modules for RPNet
 
 - Jongwon Han (@KIGAM)
 - jwhan@kigam.re.kr
-- Last update: 2025. 3. 18.
+- Last update: 2025. 5. 15.
 """
 
 ###############################################
@@ -38,27 +38,46 @@ import traceback
 
 np.random.seed(0)
 
-# TauP model
-model = TauPyModel(model="ak135")
 
-def change2taup(vals):
-    idx, val, cat, ftime=vals
-    p_est = model.get_travel_times_geo(cat.dep, cat.lat, cat.lon, val.lat,val.lon, phase_list=['P', 'Pn', 'p'])[0].time
-    p_est = UTCDateTime(cat[ftime])+p_est
-    return p_est
+
+def est_taup(vals):
+    idx, val, cat, ftime,pha,model,keep_initial_phase=vals
+
+    # TauP model
+    model = TauPyModel(model=model)
+    # model = TauPyModel(model="ak135")
+    # model = TauPyModel(model="/home/jwhan/_Research/RPNet/release/rpnet_dev/example2/srkim_iasp.npz")
+
+    if pha=='P':
+        if keep_initial_phase and pd.notnull(val['ptime0']):
+            est = UTCDateTime(val['ptime0'])
+        else:
+            est = model.get_travel_times_geo(cat.dep, cat.lat, cat.lon, val.lat,val.lon, phase_list=['P', 'Pn', 'p'])[0].time
+            est = UTCDateTime(cat[ftime])+est
+    elif pha=='S':
+        if keep_initial_phase and pd.notnull(val['stime0']):
+            est = UTCDateTime(val['stime0'])
+        else:
+            est = model.get_travel_times_geo(cat.dep, cat.lat, cat.lon, val.lat,val.lon, phase_list=['S', 'Sn', 's'])[0].time
+            est = UTCDateTime(cat[ftime])+est
+
+    return est
 
 
 def wf2matrix(vals):
     try:
         idx,val,fwfid,fptime,wf_dir,out_dir=vals
-        st=read(wf_dir+'/'+val[fwfid]+'/'+val.sta+'.*')
-        st=st.select(channel='*Z')
+        st0=read(wf_dir+'/'+val[fwfid]+'/'+val.sta+'.*')
+        st=st0.select(channel='*Z')
+        if len(st)==0:
+            st=st0.select(channel='*U')
         if not st[0].stats.sampling_rate==100:
             st.interpolate(100)
         if not len(st)==0:
             st.merge()
         st.filter('highpass',freq=1)
-        st.trim(val[fptime]-2.5,val[fptime]+2.5).normalize()
+        ptime=UTCDateTime(val[fptime])
+        st.trim(ptime-2.5,ptime+2.5).normalize()
 
         # if len(st[0].data)<500:
         #     return

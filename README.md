@@ -31,8 +31,9 @@ git clone https://github.com/jongwon-han/RPNet
 ```
 
 Next, open the Jupyter notebook **run_RPNet.ipynb** in the example directory to refer to the example files and tutorial.
-
-RPNet supports multiprocessing-based preprocessing using the **parmap** module.<br>
+RPNet supports multiprocessing-based preprocessing using the **parmap** module.<br><br>
+**Example1** (P-poalrity): Two earthquake events with magnitudes of 4.0 and 4.4, selected from the Kumamoto earthquake sequence as used in the original paper (Han et al., 2025)<br>
+**Example2** (P-polarity & S/P ratio): 2024 M4.8 and M3.1 Buan Earthquake dataset (South Korea)<br>
 
 ---
 ### Dependencies
@@ -52,10 +53,13 @@ RPNet supports multiprocessing-based preprocessing using the **parmap** module.<
 - 'notebook==7.3.2'
 
 ---
+### New Features
+🚀  [version 0.1.0] Automatic estimation of S/P ratio for the focal mechanism calculation (SKHASH) (May 15, 2025)<br>
+
+---
 ### Upcoming Features
 I am planning to add the following features in future updates:<br>
 🚀  Training (scratch) & Re-training (fine-tuning/transfer learning) modules<br>
-🚀  Automatic estimation of S/P ratio for the focal mechanism calculation (SKHASH)<br>
 
 I'm working on this and will update it soon!
 

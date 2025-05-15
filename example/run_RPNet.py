@@ -1,5 +1,5 @@
 """
-# RPNet (v.0.0.2)
+# RPNet (v.0.1.0)
 https://github.com/jongwon-han/RPNet
 
 RPNet: Robust P-wave first-motion polarity determination using deep learning (Han et al., 2025; SRL)
@@ -9,7 +9,7 @@ Example script to run the sample Hi-net dataset
 
 - Jongwon Han (@KIGAM)
 - jwhan@kigam.re.kr
-- Last update: 2025. 3. 18.
+- Last update: 2025. 5. 15.
 """
 
 #########################################################################################################
@@ -36,11 +36,11 @@ import fnmatch
 import time
 from rpnet import *
 from hyperparams import *
-
+import glob
 #########################################################################################################
 
 # set gpu number
-os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_num)
+os.environ['CUDA_VISIBLE_DEVICES'] = gpu_num
 
 stime=time.time()
 
@@ -55,23 +55,27 @@ cat_df=pd.read_csv(event_catalog)
 pha_df=pd.read_csv(phase_metadata)
 sta_df=pd.read_csv(sta_metadata).sort_values(['sta']).reset_index(drop=True)
 sta_df['sta0']=sta_df['sta']
+pha_df['source']='original'
 
 # add empty pick stations
 if add_sta:
-    z_files=sorted(glob.glob(wf_dir+'/*/*Z'))
+    z_files=sorted(glob.glob(wf_dir+'/*/*'))
     def get_add(z):
         id=z.split('/')[-2]
-        sta=z.split('/')[-1].split('.')[0]
+        sta=z.split('/')[-1].split('.U.')[0]
         if len(pha_df[(pha_df[fwfid]==id)&(pha_df['sta']==sta)])!=0:
             return pd.DataFrame()
         if not id in cat_df[fwfid].to_list():
             return pd.DataFrame()
-        return pd.DataFrame({'pick':[id],'sta':[sta],'time':[np.nan],'pha':['P']})
+        return pd.DataFrame({'pick':[id],'sta':[sta],fptime:[np.nan],fstime:[np.nan]})
     print('# get list of additional stations')
     results=parmap.map(get_add,z_files, pm_pbar=True, pm_processes=cores,pm_chunksize=1)
-    pha_df=pd.concat([pha_df]+results)
+    pha_df0=pd.concat(results)
+    pha_df0['source']='add'
+    pha_df=pd.concat([pha_df,pha_df0]).reset_index(drop=True)
 
-# Add station metadata to phase df
+print(pha_df)
+sta_df=sta_df[sta_df['sta'].isin(pha_df['sta'].to_list())].reset_index(drop=True)# Add station metadata to phase df
 print('\n# Arrange metadata')
 pha_df=pha_df[pha_df['sta'].isin(sta_df['sta'].to_list())].reset_index(drop=True)
 pha_df['lat']=[sta_df[sta_df.sta==i]['lat'].iloc[0] for i in pha_df['sta'].to_list()]
@@ -83,17 +87,28 @@ sta_df['net']='HI' # Renaming, just for consistency
 
 # make UTCDateTime objects
 cat_df[ftime]=[UTCDateTime(i) for i in cat_df[ftime].to_list()]
-pha_df[fptime]=[UTCDateTime(i) for i in pha_df[fptime].to_list()]
-print('- Done')
 
 # Change to TauP P arrival times (OPTION; considering pick uncertainty)
+print(keep_initial_phase)
 if change2taup:
     print('\n\n# change to TauP arrival')
     pha_df['ptime0']=pha_df[fptime]
-    results=parmap.map(change2taup,[[idx,val,cat_df[cat_df[fwfid]==val[fwfid]].iloc[0],ftime] for idx,val in pha_df.iterrows()]
-                       , pm_pbar=True, pm_processes=cores,pm_chunksize=1)
+    results=parmap.map(est_taup,[[idx,val,cat_df[cat_df[fwfid]==val[fwfid]].iloc[0],ftime,'P',taup_model,keep_initial_phase] for idx,val in pha_df.iterrows()]
+                    , pm_pbar=True, pm_processes=cores,pm_chunksize=1)
     pha_df[fptime]=results
-    print('- Done')
+    print('- TauP (P) Done')
+
+    print('# change to TauP S arrival')
+    pha_df['stime0']=pha_df[fstime]
+    results=parmap.map(est_taup,[[idx,val,cat_df[cat_df[fwfid]==val[fwfid]].iloc[0],ftime,'S',taup_model,keep_initial_phase] for idx,val in pha_df.iterrows()]
+                    , pm_pbar=True, pm_processes=cores,pm_chunksize=1)
+    pha_df[fstime]=results
+    print('- TauP (S) Done')
+
+
+pha_df=pha_df.sort_values([fwfid,'sta']).reset_index(drop=True)
+print(pha_df)
+
 # Make input data matrix
 print('\n\n# Make input matrix from waveform data')
 results=parmap.map(wf2matrix,[[idx,val,fwfid,fptime,wf_dir,out_dir] for idx, val in pha_df.iterrows()], pm_pbar=True, pm_processes=cores,pm_chunksize=1)
@@ -132,6 +147,6 @@ print('\n\n# Final result:')
 print(r_df.to_string())
 
 r_df=r_df.drop_duplicates(['sta',fwfid]).reset_index(drop=True)
-prep_skhash(cat_df=cat_df,pol_df=r_df,sta_df=sta_df,ftime=ftime,fwfid=fwfid,ctrl0=ctrl0,out_dir=out_dir)
+prep_skhash(cat_df=cat_df,pol_df=r_df,amp=[],sta_df=sta_df,ftime=ftime,fwfid=fwfid,ctrl0=ctrl0,out_dir=out_dir,hash_version=hash_version)
 print('% calculation time (min): ','%.2f'%((time.time()-stime)/60))
 print('\n\n@ ALL DONE!')

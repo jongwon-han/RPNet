@@ -1,0 +1,4 @@
+event_id,strike,dip,rake,quality,fault_plane_uncertainty,aux_plane_uncertainty,num_p_pol,num_sp_ratios,polarity_misfit,prob_mech,sta_distribution_ratio,sp_misfit,mult_solution_flag,time,magnitude,origin_lat,origin_lon,origin_depth_km,horz_uncert_km,vert_uncert_km
+2024T000000013,33.7,87.9,174.8,C,19.6,17.6,48,55,0.0,98.0,37.3,-90.4,False,2024-06-11 23:26:49,4.8,35.698833,126.722167,10.2,0.0,0.0
+2024T000000056,202.3,61.2,158.5,C,32.3,28.2,46,55,10.9,63.8,38.1,-90.7,True,2024-06-12 04:55:43,3.1,35.700667,126.724833,9.23,0.0,0.0
+2024T000000056,24.1,69.6,154.1,D,41.1,36.2,46,55,10.9,36.2,37.8,-92.4,True,2024-06-12 04:55:43,3.1,35.700667,126.724833,9.23,0.0,0.0

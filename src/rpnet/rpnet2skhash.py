@@ -1,42 +1,38 @@
 """
-# RPNet (v.0.0.2)
+# RPNet (v.0.1.0)
 https://github.com/jongwon-han/RPNet
 
 RPNet: Robust P-wave first-motion polarity determination using deep learning (Han et al., 2025; SRL)
 doi: https://doi.org/10.1785/0220240384
 
-Example script to run the sample Hi-net dataset
+Prepare SKHASH input files from RPNet results
 
 - Jongwon Han (@KIGAM)
 - jwhan@kigam.re.kr
-- Last update: 2025. 3. 18.
+- Last update: 2025. 5. 15.
 """
 
 ###############################################
 
-import h5py
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import parmap
-from keras_self_attention import SeqSelfAttention
 import matplotlib.pyplot as plt
 import tqdm
 import matplotlib.ticker as ticker
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import subprocess
 import shutil
 from obspy import Stream, Trace
-from obspy import UTCDateTime
-from sklearn.model_selection import train_test_split
+from obspy import UTCDateTime, read
 import plotly.figure_factory as ff
 import matplotlib
 import fnmatch
 
 np.random.seed(0)
 
-def prep_skhash(cat_df,pol_df,sta_df,out_dir,ftime,fwfid,ctrl0,hash_version='hash2'):
+def prep_skhash(cat_df,pol_df,amp,sta_df,out_dir,ftime,fwfid,ctrl0,hash_version='hash2'):
 
     if os.path.exists(out_dir+'/'+hash_version):
         shutil.rmtree(out_dir+'/'+hash_version)
@@ -58,7 +54,7 @@ def prep_skhash(cat_df,pol_df,sta_df,out_dir,ftime,fwfid,ctrl0,hash_version='has
             f1.write(str('%.5f'%val.lat).rjust(8,' '))
             f1.write(str('%.5f'%val.lon).rjust(11,' '))
             f1.write(str(int(val.elv)).rjust(6,' '))
-            f1.write(' 1900/01/01 3000/01/01 ')
+            f1.write(' 1900/01/01 3000/01/01 ') # If you need, please specify the time range of the station
             f1.write(val.net)
             if not idx==len(sta_df)-1:
                 f1.write('\n')
@@ -104,23 +100,136 @@ def prep_skhash(cat_df,pol_df,sta_df,out_dir,ftime,fwfid,ctrl0,hash_version='has
             if not idx==len(cat_df)-1:
                 f2.write('\n')
 
+    # Next, make amplitude file for hash3
+    if hash_version=='hash3':
+        with open(out_dir + '/' + hash_version + '/IN/amp.txt', 'w', encoding='UTF-8') as f:
+            for i, name in enumerate(amp):
+                if i != len(amp) - 1:
+                    f.write(name + '\n')
+                else:
+                    f.write(name)
+        pass
+
     # Last, make control file
-    with open(out_dir + '/' + hash_version + '/control_file.txt', 'a') as f3:
-        f3.write('## Control file for SKHASH driver2 (from RPNet result)\n\n')
-        f3.write('$input_format  # format of input files\n')
-        f3.write(hash_version+'\n\n')
-        f3.write('$stfile        # station list filepath\n')
-        f3.write(out_dir+ '/' + hash_version+'/IN/station.txt\n\n')
-        f3.write('$fpfile        # P-polarity input filepath\n')
-        f3.write(out_dir+ '/' + hash_version+'/IN/phase.txt\n\n')
-        f3.write('$outfile1      # focal mechanisms output filepath\n')
-        f3.write(out_dir+ '/' + hash_version+'/OUT/out.txt\n\n')
-        f3.write('$outfile2      # acceptable plane output filepath\n')
-        f3.write(out_dir+ '/' + hash_version+'/OUT/out2.txt\n\n')
-        f3.write('$outfolder_plots        # figure directory\n')
-        f3.write(out_dir+'/'+hash_version+'/OUT/figure\n\n')
-        with open(ctrl0,'r') as f4:
-            for l in f4:
-                f3.write(l)
+    if hash_version=='hash2':
+        with open(out_dir + '/' + hash_version + '/control_file.txt', 'a') as f3:
+            f3.write('## Control file for SKHASH driver2 (from RPNet result)\n\n')
+            f3.write('$input_format  # format of input files\n')
+            f3.write(hash_version+'\n\n')
+            f3.write('$stfile        # station list filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/IN/station.txt\n\n')
+            f3.write('$fpfile        # P-polarity input filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/IN/phase.txt\n\n')
+            f3.write('$outfile1      # focal mechanisms output filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/OUT/out.csv\n\n')
+            f3.write('$outfile2      # acceptable plane output filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/OUT/out2.csv\n\n')
+            f3.write('$outfolder_plots        # figure directory\n')
+            f3.write(out_dir+'/'+hash_version+'/OUT/figure\n\n')
+            with open(ctrl0,'r') as f4:
+                for l in f4:
+                    f3.write(l)
+    elif hash_version=='hash3':
+        with open(out_dir + '/' + hash_version + '/control_file.txt', 'a') as f3:
+            f3.write('## Control file for SKHASH driver3 (from RPNet result)\n\n')
+            f3.write('$input_format  # format of input files\n')
+            f3.write(hash_version+'\n\n')
+            f3.write('$stfile        # station list filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/IN/station.txt\n\n')
+            f3.write('$fpfile        # P-polarity input filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/IN/phase.txt\n\n')
+            f3.write('$ampfile       # amplitude input filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/IN/amp.txt\n\n')
+            f3.write('$outfile1      # focal mechanisms output filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/OUT/out.csv\n\n')
+            f3.write('$outfile2      # acceptable plane output filepath\n')
+            f3.write(out_dir+ '/' + hash_version+'/OUT/out2.csv\n\n')
+            f3.write('$outfolder_plots        # figure directory\n')
+            f3.write(out_dir+'/'+hash_version+'/OUT/figure\n\n')
+            with open(ctrl0,'r') as f4:
+                for l in f4:
+                    f3.write(l) 
 
     return
+
+
+
+#################################################################################################
+#################################################################################################
+# Amplitude Ratio modules
+
+
+def preprocess(p_time, s_time, stream_path, sp_win, low_freq=1.0, high_freq=20.0, taper_pct=0.01):
+    """
+    Loading and preprocessing the stream data.
+    """
+    st = read(stream_path)
+    st.trim(starttime=p_time + sp_win[0] - 5, endtime=s_time + sp_win[-1] + 10)
+    st.filter('bandpass', freqmin=low_freq, freqmax=high_freq)
+    if st[0].stats.sampling_rate != 100:
+        st.resample(100)
+    st.normalize(global_max=True)
+    st.detrend('demean')
+    st.detrend('linear')
+    st.taper(taper_pct)
+    st.sort()
+    for tr in st:
+        tr.data *= 1e3
+    return st
+
+def calc_amplitude(p_time, s_time, station, st,sp_win):
+    """
+    Calcualte the amplitude ratio of each window in the 3-channel stream,
+    then calculate the vector sum of N (nosie), P, S components and S/P ratio, and return as a formatted string.
+    """
+    # If less than 3 channels, return None
+    if len(st) != 3:
+        return "None"
+    try:
+        n_vals, p_vals, s_vals = [], [], []
+        # Calculate the amplitude of each window
+        for trace in st:
+            n_win = trace.slice(p_time + sp_win[0], p_time + sp_win[1]).copy()
+            p_win = trace.slice(p_time + sp_win[2], p_time + sp_win[3]).copy()
+            s_win = trace.slice(s_time + sp_win[4], s_time + sp_win[5]).copy()
+            n_vals.append(max(n_win) - min(n_win))
+            p_vals.append(max(p_win) - min(p_win))
+            s_vals.append(max(s_win) - min(s_win))
+        # Calculate the vector sum of N, P, S components and S/P ratio
+        N = np.sqrt(sum(val ** 2 for val in n_vals))
+        P = np.sqrt(sum(val ** 2 for val in p_vals))
+        S = np.sqrt(sum(val ** 2 for val in s_vals))
+        sp_ratio = S / P if P != 0 else float('inf')
+        # Example: sta, chan, net, 0.0, 0.0, N, N, P, S
+        return f"{station.sta:4s} {station.chan:3s} {station.net:2s} {0.0:4.1f} {0.0:4.1f} {N:18.3f} {N:10.3f} {P:10.3f} {S:10.3f}"
+    
+    except Exception:
+        return "None"
+
+def prepare_amplitudes(params):
+    """
+    Import the tuple (station_df, pick_id, event_info, data_dir,sp_freq,sp_win) and return the list of amplitude results for each station.
+    """
+    station_df, pick_id, event_info, data_dir,sp_freq,sp_win = params
+    # Remove rows without necessary columns and remove duplicates
+    station_df = station_df.drop_duplicates(subset=['sta0'])
+    station_df = station_df[station_df['ptime'].notnull() & station_df['stime'].notnull()].reset_index(drop=True)
+    
+    amp_list = []
+    for _, row in station_df.iterrows():
+        p_time = UTCDateTime(row.ptime)
+        s_time = UTCDateTime(row.stime)
+        stream_path = f"{data_dir}/{pick_id}/*{row.sta0}.*"
+        st = preprocess(p_time, s_time, stream_path, sp_win, sp_freq[0],sp_freq[1])
+        amp_str = calc_amplitude(p_time, s_time, row, st,sp_win)
+        if amp_str != "None":
+            amp_list.append(amp_str)
+    
+    amp_list.sort()
+    header = f"{event_info} {len(amp_list)}"
+    amp_list.insert(0, header)
+    
+    return amp_list
+
+#################################################################################################
+#################################################################################################

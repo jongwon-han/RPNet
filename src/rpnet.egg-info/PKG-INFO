@@ -1,6 +1,6 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.4
 Name: rpnet
-Version: 0.0.2
+Version: 0.1.0
 Summary: Robust P-wave first motion determination using deep learning (Han et al., 2025; SRL)
 Home-page: https://github.com/jongwon-han/RPNet
 Author: Jongwon_Han
@@ -28,6 +28,7 @@ Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
 Dynamic: home-page
+Dynamic: license-file
 Dynamic: project-url
 Dynamic: requires-dist
 Dynamic: requires-python
