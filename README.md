@@ -1,5 +1,7 @@
 ## RPNet (Han et al., 2025; SRL)
 
+🟩 **A new version (v0.1.0) has been released, now including functions for measuring the S/P amplitude ratio and a related example!**
+
 This is the repository for the RPNet package, a deep learning model for automatic P-wave first motion determination.
 
 The RPNet predicts P-wave polarity from SAC or MSEED files using the pre-trained model and automatically generates input files for SKHASH (Skoumal et al., 2024), a Python software based on HASH (Hardebeck and Shearer, 2002, 2003).
